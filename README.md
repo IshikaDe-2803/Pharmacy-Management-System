@@ -1,2 +1,2 @@
-# PythonProject_SEM2
-Pharmacy Management System
+# Pharmacy Management System
+Pharmacy Management System simple project in Python
