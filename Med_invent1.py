@@ -56,20 +56,24 @@ class bills:
             c.bill_ch()
 
     def add_b(c):#add a medicinal record in the bill
-        m_n=input("Enter the medicine name- ")
-        mycursor.execute("SELECT m_name from med_inv where m_name=%s",(m_n,))
-        myresult3=mycursor.fetchone()
-        mycursor.execute("SELECT m_qnt from med_inv where m_name=%s",(m_n,))
-        quant=mycursor.fetchone()
+        check=True
+        while(check==True):
+            m_n=input("Enter the medicine name- ")
+            mycursor.execute("SELECT m_name from med_inv where m_name=%s",(m_n,))
+            myresult3=mycursor.fetchone()
+            mycursor.execute("SELECT m_qnt from med_inv where m_name=%s",(m_n,))
+            quant=mycursor.fetchone()
+            m_q=int(input("Enter the medicine quantity- "))
+            if(not myresult3 or quant[0]==0):
+                print("Medicine entered is not available.")
+                check=True
+            elif(m_q>quant[0]):
+                print("Insufficient medicines in inventory. Medicine not available.")
+                check=True
+            else:
+                check=False
         mycursor.execute("SELECT m_cost from med_inv where m_name=%s",(m_n,))
         m_cst=mycursor.fetchone()#fetching the cost of medicine
-        m_q=int(input("Enter the medicine quantity- "))
-        if(not myresult3 or quant[0]==0):
-            print("Medicine entered is not available.")
-            c.add_b()
-        elif(m_q>quant[0]):
-            print("Insufficient medicines in inventory. Medicine not available.")
-            c.add_b()
         #update inventory-quantity of medicine
         mycursor.execute("UPDATE med_inv set m_qnt=m_qnt-%s where m_name=%s",(m_q,m_n,))
         ins_bil = "INSERT INTO bill (cust_date,cust_contact,med_name,med_qnt,med_cost,med_total) VALUES (%s,%s,%s,%s,%s,%s)"
@@ -100,7 +104,15 @@ class bills:
 
 #dele() is used to delete records from the inventory
 def dele():
-    del_refno=int(input("Enter the record reference number that you want to delete:"))
+    dele_ref=False
+    while(dele_ref==False):
+        try:
+            del_refno=int(input("Enter the record reference number that you want to delete:"))
+        except ValueError:
+            print("Enter Valid reference number.")
+            dele_ref=False
+        else:
+            dele_ref=True
     mycursor.execute("SELECT ref_no FROM med_inv WHERE ref_no=%s",(del_refno,))
     ref_present=mycursor.fetchone() 
     if(not ref_present):#checking presence of record
@@ -114,7 +126,7 @@ def dele():
 #disp() is used to display the inventory of pharmacy
 def disp():
     #Selecting data from inventory
-    mycursor.execute("SELECT * FROM med_inv")
+    mycursor.execute("SELECT * FROM med_inv order by ref_no")
     myresult = mycursor.fetchall()
     #displaying inventory in tabular form
     print(tabulate(myresult,headers = ["Ref No: ","Company Name","Medicine Type","Medicine Name","Quantity","Cost"], tablefmt='psql',numalign="left"))
@@ -210,7 +222,24 @@ def mainpg():
     elif(choice1==2):
         #Add a medicine to inventory
         #Accepting medicine details
-        ref_no=input("Enter medicine reference number: ")
+        present=True
+        while(present==True):
+            Ref_bool=True
+            while(Ref_bool==True):
+                try:
+                    ref_no=int(input("Enter medicine reference number: "))
+                except ValueError :
+                    print("Please enter Valid Reference number.")
+                    Ref_bool=True
+                else:
+                    Ref_bool=False
+            mycursor.execute("SELECT ref_no FROM med_inv order by ref_no")
+            ref_rows = mycursor.fetchall() 
+            if (any(ref_no in i for i in ref_rows)) :
+                print("Record with this reference number already present.")
+                present=True
+            else:
+                present=False
         comp_name=input("Enter medicine company name: ")
         med_type=input("Enter medicine type: ")
         m_name=input("Enter medicine name: ")
