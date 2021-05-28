@@ -29,6 +29,38 @@ class med:
         mydb.commit()#sends a COMMIT statement to the MySQL server, committing the current transaction
         print("\nMedicine record successfully inserted.")
 
+    #dele() is used to delete records from the inventory
+    @staticmethod
+    def dele():
+        dele_ref=False
+        while(dele_ref==False):
+            try:
+                del_refno=int(input("Enter the record reference number that you want to delete:"))
+            except ValueError:
+                print("Enter Valid reference number.")
+                dele_ref=False
+            else:
+                dele_ref=True
+        mycursor.execute("SELECT ref_no FROM med_inv WHERE ref_no=%s",(del_refno,))
+        ref_present=mycursor.fetchone() 
+        if(not ref_present):#checking presence of record
+            print("\nRecord not present.")
+        else:        
+            del_medin = "DELETE FROM med_inv WHERE ref_no = %s" #deleting the record via MySQL query
+            mycursor.execute(del_medin,(del_refno,))
+            mydb.commit()
+            print("\nMedicine record was successfully deleted.")
+            
+    #disp() is used to display the inventory of pharmacy
+    @staticmethod
+    def disp():
+        #Selecting data from inventory
+        mycursor.execute("SELECT * FROM med_inv order by ref_no")
+        myresult = mycursor.fetchall()
+        #displaying inventory in tabular form
+        print(tabulate(myresult,headers = ["Ref No: ","Company Name","Medicine Type","Medicine Name","Quantity","Cost"], tablefmt='psql',numalign="left"))
+
+
 #class bills defines the generation of bill section
 class bills:
     def __init__(c, cust_name,cust_contact,cust_date,cust_address,cust_docref):#__init__ initializes class variables
@@ -46,7 +78,7 @@ class bills:
             print("\nMedicine successfully added.")
             c.bill_ch()
         elif(ch2==2):
-            del_b()#delete medicine from bill
+            bills.del_b()#delete medicine from bill
             c.bill_ch()
         elif(ch2==3):
             c.disp_b()#display the bill
@@ -102,50 +134,22 @@ class bills:
         mycursor.execute(ins_bilhist,val_bilhist)
         mydb.commit()
 
-#dele() is used to delete records from the inventory
-def dele():
-    dele_ref=False
-    while(dele_ref==False):
-        try:
-            del_refno=int(input("Enter the record reference number that you want to delete:"))
-        except ValueError:
-            print("Enter Valid reference number.")
-            dele_ref=False
+    #del_b() func deletes the med_name record of customer
+    @staticmethod
+    def del_b():
+        del_medname=input("\nEnter the medicine name that you want to delete:")
+        mycursor.execute("SELECT med_name FROM bill WHERE med_name=%s",(del_medname,))
+        med_present=mycursor.fetchone()
+        if(not med_present):#checking presence of record
+            print("\nRecord not present.")
         else:
-            dele_ref=True
-    mycursor.execute("SELECT ref_no FROM med_inv WHERE ref_no=%s",(del_refno,))
-    ref_present=mycursor.fetchone() 
-    if(not ref_present):#checking presence of record
-        print("\nRecord not present.")
-    else:        
-        del_medin = "DELETE FROM med_inv WHERE ref_no = %s" #deleting the record via MySQL query
-        mycursor.execute(del_medin,(del_refno,))
-        mydb.commit()
-        print("\nMedicine record was successfully deleted.")
-        
-#disp() is used to display the inventory of pharmacy
-def disp():
-    #Selecting data from inventory
-    mycursor.execute("SELECT * FROM med_inv order by ref_no")
-    myresult = mycursor.fetchall()
-    #displaying inventory in tabular form
-    print(tabulate(myresult,headers = ["Ref No: ","Company Name","Medicine Type","Medicine Name","Quantity","Cost"], tablefmt='psql',numalign="left"))
-
-#del_b() func deletes the med_name record of customer
-def del_b():
-    del_medname=input("\nEnter the medicine name that you want to delete:")
-    mycursor.execute("SELECT med_name FROM bill WHERE med_name=%s",(del_medname,))
-    med_present=mycursor.fetchone()
-    if(not med_present):#checking presence of record
-        print("\nRecord not present.")
-    else:
-        mycursor.execute("SELECT med_qnt FROM bill WHERE med_name=%s",(del_medname,))
-        med_qnt=mycursor.fetchone()
-        mycursor.execute("UPDATE med_inv set m_qnt=m_qnt+%s where m_name=%s",(med_qnt[0],del_medname,))#updating the quantity changes in inventory
-        del_med = "DELETE FROM bill WHERE med_name = %s "
-        mycursor.execute(del_med,(del_medname,))
-        mydb.commit()
-        print("\nMedicine record was successfully deleted.")
+            mycursor.execute("SELECT med_qnt FROM bill WHERE med_name=%s",(del_medname,))
+            med_qnt=mycursor.fetchone()
+            mycursor.execute("UPDATE med_inv set m_qnt=m_qnt+%s where m_name=%s",(med_qnt[0],del_medname,))#updating the quantity changes in inventory
+            del_med = "DELETE FROM bill WHERE med_name = %s "
+            mycursor.execute(del_med,(del_medname,))
+            mydb.commit()
+            print("\nMedicine record was successfully deleted.")
 
 #displaying customer details
 def findbill(): 
@@ -234,7 +238,7 @@ def mainpg():
     print("\n")
     if(choice1=='1'):
         #Display inventory
-        disp()
+        med.disp()
         mainpg()
     elif(choice1=='2'):
         #Add a medicine to inventory
@@ -267,7 +271,7 @@ def mainpg():
         mainpg()
     elif(choice1=='3'):
         #Delete a medicine from Inventory
-        dele()
+        med.dele()
         mainpg()
     elif(choice1=='4'):
         #Customer details input accepted
