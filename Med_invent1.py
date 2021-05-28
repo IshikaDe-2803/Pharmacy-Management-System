@@ -206,6 +206,23 @@ def isValidDate(inputDate):
         else:
             return True
 
+'''
+def valid_date():
+
+    import re
+    #using regex
+    # compiling the pattern for alphanumeric string
+    pat = re.compile(r"[0-9][0-9]+[/]+[0-9][0-9]+[/]+[0-9][0-9]+[0-9][0-9]")
+    
+    # Prompts the user for input string
+    test = input("Enter the date: ")
+    
+    # Checks whether the whole string matches the re.pattern or not
+    if (re.fullmatch(pat, test) and len(test)==10):
+        print(f"'{test}' is an alphanumeric string!")
+    else:
+    print(f"'{test}' is NOT a alphanumeric string!")'''
+
 #mainpg() function is the first page that presents the functions user may want to use
 def mainpg():
     print("\n**************************")
@@ -213,13 +230,13 @@ def mainpg():
     print("**************************\n")
     #displaying options of functions that user may want to perform
     print("1. Display Inventory\n2. Add medicine to inventory\n3. Delete Medicine from inventory\n4. Generate Bill\n5. Find bill\n6. View Sale History\n7. Exit")
-    choice1=int(input("\nEnter the function you want to perform:"))#Allows user to perform respective functions
+    choice1=input("\nEnter the function you want to perform:")#Allows user to perform respective functions
     print("\n")
-    if(choice1==1):
+    if(choice1=='1'):
         #Display inventory
         disp()
         mainpg()
-    elif(choice1==2):
+    elif(choice1=='2'):
         #Add a medicine to inventory
         #Accepting medicine details
         present=True
@@ -248,11 +265,11 @@ def mainpg():
         m1=med(ref_no,comp_name,med_type,m_name,m_qnt,m_cost)
         m1.add()#medicine details passed to add() function
         mainpg()
-    elif(choice1==3):
+    elif(choice1=='3'):
         #Delete a medicine from Inventory
         dele()
         mainpg()
-    elif(choice1==4):
+    elif(choice1=='4'):
         #Customer details input accepted
         cust_name=input("Enter customer name: ")
         
@@ -277,15 +294,15 @@ def mainpg():
         cust_docref=input("Enter customer's doctor referal: ")
         b1=bills(cust_name,cust_contact,cust_date,cust_address,cust_docref)
         b1.bill_ch()#Customer details passed to bill_ch() to add/del/generate bill
-    elif(choice1==5):
+    elif(choice1=='5'):
         #find/display a particular customer's bill on particular date
         findbill()
         mainpg()
-    elif(choice1==6):
+    elif(choice1=='6'):
         #display sale history of a particular date
         sale_hist()
         mainpg()
-    elif(choice1==7):
+    elif(choice1=='7'):
         #Exit from the execution
         exit()
     else:
